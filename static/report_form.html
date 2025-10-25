@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Report</title>
+    <link rel="icon" type="image/x-icon" href="/static/dev.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <img src="/static/dev.png" alt="Logo" width="32" height="32" class="d-inline-block align-text-top me-2">
+            Forum
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/create-post"><i class="bi bi-plus-circle icon"></i> Create post</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-circle icon"></i>Profile</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right icon"></i>Log out</a></li>
+                <li class="nav-item">
+                    <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle theme">
+                        <i class="bi bi-moon" id="themeIcon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title mb-4"><i class="bi bi-flag icon"></i>Report</h1>
+                    {{if .Error}}<div class="alert alert-danger">{{.Error}}</div>{{end}}
+                    <form method="post" action="/submit-report">
+                        <input type="hidden" name="post_id" value="{{.PostID}}">
+                        <input type="hidden" name="comment_id" value="{{.CommentID}}">
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning"><i class="bi bi-flag"></i> Submit</button>
+                        <a href="/" class="btn btn-secondary ms-2"><i class="bi bi-house"></i> Home</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // --- Переключение темы ---
+    function setTheme(theme) {
+        document.body.classList.remove('theme-dark', 'theme-light');
+        document.body.classList.add('theme-' + theme);
+        localStorage.setItem('theme', theme);
+        document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon' : 'bi bi-sun';
+    }
+    function toggleTheme() {
+        const current = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+        setTheme(current === 'dark' ? 'light' : 'dark');
+    }
+    document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+    (function() {
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        setTheme(theme);
+    })();
+</script>
+</body>
+</html> 

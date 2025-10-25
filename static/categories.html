@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Categories</title>
+    <link rel="icon" type="image/x-icon" href="/static/dev.ico">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <a class="navbar-brand" href="/">
+        <img src="/static/dev.png" alt="Logo" width="32" height="32" class="d-inline-block align-text-top me-2">
+        Forum
+    </a>
+    <h1>Categories</h1>
+    {{if .Success}}<div class="success">{{.Success}}</div>{{end}}
+    {{if .Error}}<div class="error">{{.Error}}</div>{{end}}
+    <ul>
+        {{range .Categories}}
+            <li>{{.Name}}</li>
+        {{else}}
+            <li>No categories</li>
+        {{end}}
+    </ul>
+    <hr>
+    {{if .IsAdmin}}
+    <h2>Create new category</h2>
+    <form method="post" action="/categories">
+        <input type="text" name="name" placeholder="Category name" required>
+        <button type="submit">Create</button>
+    </form>
+    {{end}}
+    <a href="/">Home</a>
+</body>
+</html> 

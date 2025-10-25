@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+    <link rel="icon" type="image/x-icon" href="/static/dev.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <img src="/static/dev.png" alt="Logo" width="32" height="32" class="d-inline-block align-text-top me-2">
+            Forum
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/create-post"><i class="bi bi-plus-circle icon"></i> Create post</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-circle icon"></i>Profile</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right icon"></i>Log out</a></li>
+                <li class="nav-item">
+                    <button class="theme-toggle-btn" id="themeToggleBtn" title="Change theme">
+                        <i class="bi bi-moon" id="themeIcon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-4">
+    {{if .Error}}
+        <div class="alert alert-danger">{{.Error}}</div>
+    {{end}}
+    {{if .Success}}
+        <div class="alert alert-success">{{.Success}}</div>
+    {{end}}
+    {{range .Posts}}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><a href="/post?id={{.ID}}"><i class="bi bi-file-earmark-text icon"></i>{{.Title}}</a></h5>
+                <p class="card-text content-text">{{.Content}}</p>
+                <p class="card-text"><small class="text-muted"><i class="bi bi-person-circle"></i> {{.Username}} | <i class="bi bi-clock"></i> <span class="utc-time" data-utc="{{.CreatedAt}}"></span></small></p>
+                <div class="d-flex align-items-center like-container" data-post-id="{{.ID}}">
+                    <a href="/like?post_id={{.ID}}&is_like=true" class="like-btn text-decoration-none me-2" data-is-like="true">
+                        <i class="bi bi-hand-thumbs-up"></i> <span class="likes-count">{{.Likes}}</span>
+                    </a>
+                    <a href="/like?post_id={{.ID}}&is_like=false" class="like-btn text-decoration-none" data-is-like="false">
+                        <i class="bi bi-hand-thumbs-down"></i> <span class="dislikes-count">{{.Dislikes}}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {{end}}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    .content-text {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
+<script>
+    // --- Переключение темы ---
+    function setTheme(theme) {
+        document.body.classList.remove('theme-dark', 'theme-light');
+        document.body.classList.add('theme-' + theme);
+        localStorage.setItem('theme', theme);
+        document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon' : 'bi bi-sun';
+    }
+    function toggleTheme() {
+        const current = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+        setTheme(current === 'dark' ? 'light' : 'dark');
+    }
+    document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+        // При загрузке страницы
+        (function() {
+            let theme = localStorage.getItem('theme');
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            setTheme(theme);
+        })();
+
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                const url = this.href;
+                const container = this.closest('.like-container');
+                fetch(url, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        container.querySelector('.likes-count').textContent = data.likes;
+                        container.querySelector('.dislikes-count').textContent = data.dislikes;
+                    });
+            });
+        });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Local time conversion for all .utc-time elements
+        document.querySelectorAll('.utc-time').forEach(function(el) {
+            const utc = el.dataset.utc;
+            if (utc) {
+                const date = new Date(utc);
+                el.textContent = date.toLocaleString();
+            }
+        });
+    });
+</script>
+</body>
+</html>

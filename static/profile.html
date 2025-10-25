@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="icon" type="image/x-icon" href="/static/dev.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <img src="/static/dev.png" alt="Logo" width="32" height="32" class="d-inline-block align-text-top me-2">
+            Forum
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/create-post"><i class="bi bi-plus-circle icon"></i> Create post</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-circle icon"></i>Profile</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right icon"></i>Log out</a></li>
+                <li class="nav-item">
+                    <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle theme">
+                        <i class="bi bi-moon" id="themeIcon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="bi bi-person-badge icon"></i>My activity</h1>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title"><i class="bi bi-file-earmark-text icon"></i>My posts</h2>
+                    <ul class="list-group list-group-flush">
+                        {{range .Posts}}
+                        <li class="list-group-item bg-transparent">
+                            <a href="/post?id={{.ID}}">{{.Title}}</a>
+                            <a href="/edit-post?id={{.ID}}" class="text-primary ms-2"><i class="bi bi-pencil-square"></i></a>
+                            <button type="button" class="text-danger ms-2" style="background:none;border:none;padding:0;" onclick="deletePost({{.ID}})"><i class="bi bi-trash"></i></button>
+                            <span class="utc-time" data-utc="{{.CreatedAt}}"></span>
+                        </li>
+                        {{else}}
+                        <li class="list-group-item bg-transparent">No posts</li>
+                        {{end}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title"><i class="bi bi-chat-dots icon"></i>My comments</h2>
+                    <ul class="list-group list-group-flush">
+                        {{range .Comments}}
+                        <li class="list-group-item bg-transparent">
+                            To post <a href="/post?id={{.PostID}}">#{{.PostID}}</a>: {{.Content}}
+                            <a href="/edit-comment?id={{.ID}}" class="text-primary ms-2"><i class="bi bi-pencil-square"></i></a>
+                            <a href="/delete-comment?id={{.ID}}" class="text-danger ms-2" onclick="return confirm('Delete comment?');"><i class="bi bi-trash"></i></a>
+                            <span class="utc-time" data-utc="{{.CreatedAt}}"></span>
+                        </li>
+                        {{else}}
+                        <li class="list-group-item bg-transparent">No comments</li>
+                        {{end}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title"><i class="bi bi-hand-thumbs-up icon"></i>My likes/dislikes</h2>
+                    <ul class="list-group list-group-flush">
+                        {{range .Likes}}
+                        <li class="list-group-item bg-transparent">
+                            {{if .IsLike}}<i class="bi bi-hand-thumbs-up-fill text-info"></i>{{else}}<i class="bi bi-hand-thumbs-down-fill text-danger"></i>{{end}}
+                            {{if .PostID}}Post #{{.PostID}}{{end}}
+                            {{if .CommentID}}Comment #{{.CommentID}}{{end}}
+                            (<span class="utc-time" data-utc="{{.CreatedAt}}"></span>)
+                        </li>
+                        {{else}}
+                        <li class="list-group-item bg-transparent">No likes/dislikes</li>
+                        {{end}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="/" class="btn btn-secondary mt-3"><i class="bi bi-house icon"></i>Home</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // --- Theme toggle ---
+    function setTheme(theme) {
+        document.body.classList.remove('theme-dark', 'theme-light');
+        document.body.classList.add('theme-' + theme);
+        localStorage.setItem('theme', theme);
+        document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon' : 'bi bi-sun';
+    }
+    function toggleTheme() {
+        const current = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+        setTheme(current === 'dark' ? 'light' : 'dark');
+    }
+    document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+    (function() {
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        setTheme(theme);
+    })();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Local time conversion for all .utc-time elements
+        document.querySelectorAll('.utc-time').forEach(function(el) {
+            const utc = el.dataset.utc;
+            if (utc) {
+                const date = new Date(utc);
+                el.textContent = date.toLocaleString();
+            }
+        });
+    });
+</script>
+<script>
+function deletePost(postId) {
+    if (!confirm('Delete post?')) return;
+    fetch(`/delete-post?id=${postId}`, { method: 'DELETE' })
+        .then(res => {
+            if (res.redirected) {
+                window.location.href = res.url;
+            } else {
+                return res.text().then(text => { alert(text); });
+            }
+        })
+        .catch(err => alert('Error deleting post: ' + err));
+}
+</script>
+</body>
+</html> 
